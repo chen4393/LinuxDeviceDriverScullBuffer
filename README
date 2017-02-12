@@ -1,0 +1,74 @@
+/* CSci5103 Fall 2016
+* Assignment# 7
+* name: <Chaoran Chen>
+* student id: <5187049>
+* x500 id: <chen4393>
+* CSELABS machine: <machine you tested on eg: xyz.cselabs.umn.edu>
+*/
+Test guide:
+Go to scullbuffer folder, follow these steps:
+1. Execute Make: 
+   make
+2. If scull devices already exist then unload them first.
+   sudo ./scull_unload
+   This may ask you for your root password.
+3. Load scull devices
+   sudo ./scull_load
+   This will create four scull devices (scull0, scull1, scull2, scull3), and four
+   scullpipe devices (scullpipe0, scullpipe1, scullpipe2, scullpipe3). 
+4. Check that devices are properly created.
+   ls -ltr /dev/scull*
+5. Change device permissions to 777
+   sudo chmod 777 /dev/scull*
+
+Then go to test folder, make directly to test it.
+
+Testcase #1
+In this case, open 2 terminals and the command are ./Producer BLACK 50 and ./Consumer 50. Each will print 50 items and exit successfully.
+
+Testcase #2
+In this case, ./Producer BLACK 50 and ./Consumer 10. The consumer will print 10 items read from the buffer and exit. The producer will print 30 items and the last message is "Producer BLACK writing nothing!", which means that the producer return 0 when there is no consumer and the buffer is full.
+
+Testcase #3
+In this case, ./Producer BLACK 50 and ./Consumer 100. The consumer will print "Consumer reading nothing!", which means that the consumer return 0 when there is no producer and the buffer is empty.
+
+Testcase #4
+In this case, run two producer processes, pass the parameter as ./Producer BLACK 50 and ./Producer WHITE 50. Run a consumer process, pass the parameter as ./Consumer 200. Open 3 winodws. You will see 2 producers are printing their info about what they have written to the buffer and the consumer are alternative reading messages written by producer BLACK and WHITE. 
+
+The producer BLACK will print its debugging messages like this:
+Producer wrote: BLACK0000001
+Producer wrote: BLACK0000002
+Producer wrote: BLACK0000003
+......
+Producer wrote: BLACK0000050
+
+The producer WHITE will print its debugging messages like this:
+Producer wrote: WHITE0000001
+Producer wrote: WHITE0000002
+Producer wrote: WHITE0000003
+......
+Producer wrote: WHITE0000050
+
+The consumer will print its debugging messages like this:
+Consumer read: BLACK000001
+Consumer read: BLACK000002
+Consumer read: BLACK000003
+Consumer read: BLACK000004
+Consumer read: BLACK000005
+Consumer read: BLACK000006
+Consumer read: BLACK000007
+Consumer read: BLACK000008
+Consumer read: BLACK000009
+Consumer read: WHITE000001
+Consumer read: BLACK000010
+Consumer read: WHITE000002
+Consumer read: BLACK000011
+......
+Consumer read: WHITE000048
+Consumer read: WHITE000049
+Consumer read: WHITE000050
+Consumer reading nothing!
+It is random, but notice that the last line. Sine the consumer can consume at most 100 items, so in its 101st message, the buffer is empty and there are no producer processes that currently have scullbuffer open for writing, the consumer will return 0. Therefore, in my debugging info, it will print "Consumer reading nothing!".
+
+Testcase #5
+In this test case, open 3 windows, one for producer BLACK, others for consumers. Pass the parameter as ./Producer BLACK 50, ./Consumer 50, ./Consumer 50. You will see two consumers are contending for the messages produced by the producer. Since less than 50 items will be consumed by each consumer, the consumer needs to return 0 in the 51th iteration, whch means that it will print "Consumer reading nothing!".
